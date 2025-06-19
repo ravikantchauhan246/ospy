@@ -2,38 +2,47 @@ package main
 
 import (
 	"context"
-	// "fmt"
+	"flag"
+	"fmt"
 	"log"
-	"time"
 
+	"github.com/ravikantchauhan246/ospy/internal/config"
 	"github.com/ravikantchauhan246/ospy/internal/monitor"
 )
 
-func main(){
-	checker := monitor.NewChecker(10 * time.Second)
+func main() {
+	configPath := flag.String("config", "configs/config.yaml", "Path to configuration file")
+	flag.Parse()
 
-	urls := []string{
-		"https://google.com",
-		"https://github.com",
-		"https://httpstat.us/500",// this will fail
-		"https://httpstat.us/200",// This will pass
-		"https://ravikant.dev",// This will pass
-		
+	// Load configuration
+	cfg, err := config.Load(*configPath)
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
 	}
 
-	for _, url := range urls{
-		result := checker.Check(context.Background(), url)
+	// Validate configuration
+	if err := cfg.Validate(); err != nil {
+		log.Fatalf("Invalid configuration: %v", err)
+	}
 
-		if result.Error != nil {
-			log.Printf("❌ %s - Error: %v", url, result.Error)
-		}else{
-			status := "✅"
-			if !result.IsUp {
-				status = "❌"
-			}
-				log.Printf("%s %s - Status: %d, Time: %v", 
-				status, url, result.Status, result.ResponseTime)
+	fmt.Printf("Loaded configuration:\n")
+	fmt.Printf("- Monitoring interval: %v\n", cfg.Monitoring.Interval)
+	fmt.Printf("- Monitoring timeout: %v\n", cfg.Monitoring.Timeout)
+	fmt.Printf("- Workers: %d\n", cfg.Monitoring.Workers)
+	fmt.Printf("- Websites: %d\n", len(cfg.Websites))
+
+	// Test checker with configured websites
+	checker := monitor.NewChecker(cfg.Monitoring.Timeout)
+	
+	for _, website := range cfg.Websites {
+		result := checker.Check(context.Background(), website.URL)
+		
+		status := "✅"
+		if !result.IsUp {
+			status = "❌"
 		}
+		
+		fmt.Printf("%s %s (%s) - Status: %d, Time: %v\n", 
+			status, website.Name, website.URL, result.Status, result.ResponseTime)
 	}
 }
-
