@@ -48,8 +48,8 @@ type EmailConfig struct {
 	Enabled  bool     `yaml:"enabled"`
 	SMTPHost string   `yaml:"smtp_host"`
 	SMTPPort int      `yaml:"smtp_port"`
-	// Username string   `yaml:"username"`
-	// Password string   `yaml:"password"`
+	Username string   // Loaded from environment variable
+	Password string   // Loaded from environment variable
 	From     string   `yaml:"from"`
 	To       []string `yaml:"to"`
 }
@@ -57,7 +57,7 @@ type EmailConfig struct {
 // TelegramConfig contains Telegram notification settings
 type TelegramConfig struct {
 	Enabled  bool   `yaml:"enabled"`
-	// BotToken string `yaml:"bot_token"`
+	BotToken string // Loaded from environment variable
 	ChatID   string `yaml:"chat_id"`
 }
 
@@ -97,9 +97,9 @@ func Load(path string) (*Config, error) {
 
 	// Set defaults
 
-	config.Notifications.Email.User = os.Getenv("SMTP_USERNAME")
-	config.Notifications.Email.Pass = os.Getenv("SMTP_PASSWORD")
-	config.Notifications.Telegram.Token = os.Getenv("TELEGRAM_BOT_TOKEN")
+	config.Notifications.Email.Username = os.Getenv("SMTP_USERNAME")
+	config.Notifications.Email.Password = os.Getenv("SMTP_PASSWORD")
+	config.Notifications.Telegram.BotToken = os.Getenv("TELEGRAM_BOT_TOKEN")
 
 	if config.Monitoring.Interval == 0 {
 		config.Monitoring.Interval = 5 * time.Minute
