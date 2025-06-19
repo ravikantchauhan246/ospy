@@ -1,6 +1,6 @@
 monitoring:
-  interval: 300s        # Check every 5 minutes
-  timeout: 30s          # Request timeout
+  interval: 10s        # Check every 10 seconds
+  timeout: 5s          # Request timeout
   retries: 3            # Number of retries
   workers: 5            # Number of concurrent workers
 
