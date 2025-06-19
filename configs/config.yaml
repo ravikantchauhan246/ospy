@@ -1,0 +1,65 @@
+monitoring:
+  interval: 300s        # Check every 5 minutes
+  timeout: 30s          # Request timeout
+  retries: 3            # Number of retries
+  workers: 5            # Number of concurrent workers
+
+# Websites to monitor
+websites:
+  - name: "Google"
+    url: "https://google.com"
+    method: "GET"
+    expected_status: 200
+    
+  - name: "GitHub"
+    url: "https://github.com"
+    method: "GET"
+    expected_status: 200
+    
+  - name: "Test Failure"
+    url: "https://httpstat.us/500"
+    method: "GET"
+    expected_status: 200
+
+  - name: "Test Timeout"
+    url: "https://httpstat.us/200?sleep=60000"  # Simulate a long response time
+    method: "GET"
+    expected_status: 200
+  
+  - name: "Portfolio"
+    url: "https://ravikant.dev"
+    method: "GET"
+    expected_status: 200
+
+# Notification settings
+notifications:
+  email:
+    enabled: true
+    smtp_host: "smtp.gmail.com"
+    smtp_port: 587
+    
+    from: "ospy@yourdomain.com"
+    to: ["admin@yourdomain.com"]
+    
+  telegram:
+    enabled: false
+    chat_id: "YOUR_CHAT_ID"
+
+# Storage configuration
+storage:
+  type: "sqlite"
+  path: "./data/ospy.db"
+  retention_days: 30
+
+# Web interface
+web:
+  enabled: true
+  host: "0.0.0.0"
+  port: 8080
+
+# Logging
+logging:
+  level: "info"
+  file: "./logs/ospy.log"
+  max_size: 100
+  max_backups: 5
