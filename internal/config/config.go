@@ -10,12 +10,12 @@ import (
 
 // Config represents the application configuration
 type Config struct {
-	Monitoring    MonitoringConfig    `yaml:"monitoring"`
-	Websites      []WebsiteConfig     `yaml:"websites"`
-	Notifications NotificationConfig  `yaml:"notifications"`
-	Storage       StorageConfig       `yaml:"storage"`
-	Web           WebConfig           `yaml:"web"`
-	Logging       LoggingConfig       `yaml:"logging"`
+	Monitoring    MonitoringConfig   `yaml:"monitoring"`
+	Websites      []WebsiteConfig    `yaml:"websites"`
+	Notifications NotificationConfig `yaml:"notifications"`
+	Storage       StorageConfig      `yaml:"storage"`
+	Web           WebConfig          `yaml:"web"`
+	Logging       LoggingConfig      `yaml:"logging"`
 }
 
 // MonitoringConfig contains monitoring settings
