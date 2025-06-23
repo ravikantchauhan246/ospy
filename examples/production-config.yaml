@@ -1,0 +1,63 @@
+# Production Configuration Example
+# This configuration is optimized for production monitoring
+# with shorter intervals and comprehensive notification setup
+
+monitoring:
+  interval: 60s        # Check every minute for production
+  timeout: 30s         # Longer timeout for complex applications
+  retries: 5           # More retries for reliability
+  workers: 10          # More workers for concurrent monitoring
+
+# Critical production websites
+websites:
+  - name: "Main Website"
+    url: "https://mycompany.com"
+    method: "GET"
+    expected_status: 200
+    
+  - name: "API Endpoint"
+    url: "https://api.mycompany.com/health"
+    method: "GET"
+    expected_status: 200
+    
+  - name: "Admin Panel"
+    url: "https://admin.mycompany.com/login"
+    method: "GET"
+    expected_status: 200
+    
+  - name: "Database Health Check"
+    url: "https://api.mycompany.com/db/health"
+    method: "GET"
+    expected_status: 200
+
+# Production notification settings
+notifications:
+  email:
+    enabled: true      # Enable email alerts for production
+    smtp_host: "smtp.company.com"
+    smtp_port: 587
+    from: "monitoring@mycompany.com"
+    to: ["devops@mycompany.com", "admin@mycompany.com"]
+    
+  telegram:
+    enabled: true      # Enable Telegram for instant alerts
+    chat_id: "-1001234567890"  # Group chat ID for team notifications
+
+# Production storage with longer retention
+storage:
+  type: "sqlite"
+  path: "/var/lib/ospy/ospy.db"
+  retention_days: 90   # Keep 3 months of data for compliance
+
+# Web interface enabled for production dashboard
+web:
+  enabled: true
+  host: "0.0.0.0"
+  port: 8080
+
+# Production logging
+logging:
+  level: "warn"        # Only warnings and errors in production
+  file: "/var/log/ospy/ospy.log"
+  max_size: 100
+  max_backups: 10

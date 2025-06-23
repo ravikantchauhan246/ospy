@@ -140,6 +140,42 @@ export SMTP_PASSWORD="your-app-password"
 export TELEGRAM_BOT_TOKEN="123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
 ```
 
+### Configuration Examples
+
+The `examples/` directory contains ready-to-use configurations for different scenarios:
+
+- **`minimal-config.yaml`** - Basic monitoring setup, perfect for getting started
+- **`development-config.yaml`** - Optimized for development environments
+- **`production-config.yaml`** - Enterprise-ready production configuration
+
+Copy an example to get started quickly:
+```bash
+# Linux/macOS
+cp examples/production-config.yaml configs/config.yaml
+
+# Windows
+copy examples\production-config.yaml configs\config.yaml
+```
+
+### Health Check
+
+Validate your configuration before running:
+
+```bash
+# Linux/macOS
+./scripts/health-check.sh
+
+# Windows PowerShell
+.\scripts\health-check.ps1
+```
+
+The health check script will verify:
+- Configuration file syntax
+- Required directories and permissions
+- Environment variables for notifications
+- Website connectivity
+- Ospy binary functionality
+
 ### Running
 
 ```bash
