@@ -1,0 +1,63 @@
+# Development Configuration Example
+# This configuration is optimized for development and testing
+# with verbose logging and quick feedback
+
+monitoring:
+  interval: 10s        # Quick checks for development
+  timeout: 5s          # Short timeout for fast feedback
+  retries: 2           # Fewer retries for development
+  workers: 3           # Fewer workers for development
+
+# Development websites and local services
+websites:
+  - name: "Local Development Server"
+    url: "http://localhost:3000"
+    method: "GET"
+    expected_status: 200
+    
+  - name: "Local API"
+    url: "http://localhost:8000/api/health"
+    method: "GET"
+    expected_status: 200
+    
+  - name: "Test Environment"
+    url: "https://test.myapp.com"
+    method: "GET"
+    expected_status: 200
+    
+  - name: "Staging Environment"
+    url: "https://staging.myapp.com"
+    method: "GET"
+    expected_status: 200
+
+# Development notification settings (typically disabled)
+notifications:
+  email:
+    enabled: false     # Usually disabled in development
+    smtp_host: "smtp.gmail.com"
+    smtp_port: 587
+    from: "dev@localhost"
+    to: ["developer@mycompany.com"]
+    
+  telegram:
+    enabled: false     # Usually disabled in development
+    chat_id: "your-dev-chat-id"
+
+# Development storage with shorter retention
+storage:
+  type: "sqlite"
+  path: "./data/dev-ospy.db"
+  retention_days: 7    # Keep only 1 week of data in development
+
+# Web interface enabled for development
+web:
+  enabled: true
+  host: "127.0.0.1"    # Only localhost access in development
+  port: 8080
+
+# Development logging (verbose)
+logging:
+  level: "debug"       # Detailed logging for development
+  file: "./logs/dev-ospy.log"
+  max_size: 50
+  max_backups: 3

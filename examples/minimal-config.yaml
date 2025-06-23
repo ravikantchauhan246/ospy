@@ -1,0 +1,41 @@
+# Minimal Configuration Example
+# This is a bare-bones configuration for simple monitoring
+# Perfect for getting started quickly
+
+monitoring:
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  workers: 2
+
+# Just a few essential websites
+websites:
+  - name: "My Website"
+    url: "https://example.com"
+    method: "GET"
+    expected_status: 200
+
+# No notifications configured - just monitoring
+notifications:
+  email:
+    enabled: false
+    
+  telegram:
+    enabled: false
+
+# Basic storage
+storage:
+  type: "sqlite"
+  path: "./data/ospy.db"
+  retention_days: 30
+
+# Web interface disabled
+web:
+  enabled: false
+
+# Simple logging
+logging:
+  level: "info"
+  file: "./logs/ospy.log"
+  max_size: 50
+  max_backups: 3
