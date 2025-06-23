@@ -11,6 +11,7 @@ import (
 
 	"github.com/ravikantchauhan246/ospy/internal/config"
 	"github.com/ravikantchauhan246/ospy/internal/monitor"
+	"github.com/ravikantchauhan246/ospy/internal/notifier"
 	"github.com/ravikantchauhan246/ospy/internal/storage"
 )
 
@@ -40,6 +41,36 @@ func main() {
 	}
 	defer storage.Close()
 
+	// Initialize notifiers
+	var notifiers []notifier.Notifier
+	
+	// Email notifier
+	if cfg.Notifications.Email.Enabled {
+		emailNotifier := notifier.NewEmailNotifier(
+			cfg.Notifications.Email.SMTPHost,
+			cfg.Notifications.Email.SMTPPort,
+			cfg.Notifications.Email.Username,
+			cfg.Notifications.Email.Password,
+			cfg.Notifications.Email.From,
+			cfg.Notifications.Email.To,
+		)
+		notifiers = append(notifiers, emailNotifier)
+		log.Printf("Email notifications enabled: %s", cfg.Notifications.Email.SMTPHost)
+	}
+
+	// Telegram notifier
+	if cfg.Notifications.Telegram.Enabled {
+		telegramNotifier := notifier.NewTelegramNotifier(
+			cfg.Notifications.Telegram.BotToken,
+			cfg.Notifications.Telegram.ChatID,
+		)
+		notifiers = append(notifiers, telegramNotifier)
+		log.Println("Telegram notifications enabled")
+	}
+
+	// Create notification manager
+	notifManager := notifier.NewManager(notifiers)
+
 	// Create checker and worker pool
 	checker := monitor.NewChecker(cfg.Monitoring.Timeout)
 	workerPool := monitor.NewWorkerPool(cfg.Monitoring.Workers, checker)
@@ -64,10 +95,24 @@ func main() {
 	// Create monitor
 	mon := monitor.NewMonitor(workerPool, websites, cfg.Monitoring.Interval, storage)
 
-	// Connect worker pool results to monitor
+	// Connect worker pool results to monitor and notifications
 	go func() {
 		for result := range workerPool.Results() {
+			// Send to monitor for logging
 			mon.GetResults() <- result
+			
+			// Send to notification manager
+			notifResult := notifier.CheckResult{
+				WebsiteName:  result.WebsiteName,
+				URL:          result.URL,
+				Status:       result.Status,
+				ResponseTime: result.ResponseTime,
+				Error:        result.Error,
+				Timestamp:    result.Timestamp,
+				IsUp:         result.IsUp,
+				Message:      result.Message,
+			}
+			notifManager.HandleResult(notifResult)
 		}
 	}()
 
@@ -86,9 +131,32 @@ func main() {
 		}
 	}()
 
+	// Weekly summary report
+	if len(notifiers) > 0 {
+		go func() {
+			// Send first report after 1 hour, then weekly
+			time.Sleep(1 * time.Hour)
+			
+			ticker := time.NewTicker(7 * 24 * time.Hour) // Weekly
+			defer ticker.Stop()
+			
+			for {
+				stats, err := mon.GetAllStats(7 * 24 * time.Hour) // Last 7 days
+				if err != nil {
+					log.Printf("Failed to get stats for summary: %v", err)
+				} else if len(stats) > 0 {
+					notifManager.SendSummaryReport(stats)
+				}
+				
+				<-ticker.C
+			}
+		}()
+	}
+
 	log.Printf("Ospy started - monitoring %d websites every %v", 
 		len(websites), cfg.Monitoring.Interval)
 	log.Printf("Data stored in: %s", cfg.Storage.Path)
+	log.Printf("Notifications: %d providers enabled", len(notifiers))
 	log.Printf("Press Ctrl+C to stop")
 
 	// Wait for interrupt signal
