@@ -127,16 +127,15 @@ func (s *SQLiteStorage) GetStats(websiteName string, duration time.Duration) (We
 		MAX(timestamp) as last_check
 	FROM monitor_logs
 	WHERE website_name = ? AND timestamp >= ?`
-
 	var stats WebsiteStats
 	var avgResponseTime sql.NullFloat64
-	var lastCheck sql.NullTime
+	var lastCheckStr sql.NullString
 
 	err := s.db.QueryRow(query, websiteName, since).Scan(
 		&stats.TotalChecks,
 		&stats.SuccessfulChecks,
 		&avgResponseTime,
-		&lastCheck,
+		&lastCheckStr,
 	)
 
 	if err != nil {
@@ -152,13 +151,19 @@ func (s *SQLiteStorage) GetStats(websiteName string, duration time.Duration) (We
 	if stats.TotalChecks > 0 {
 		stats.UptimePercent = float64(stats.SuccessfulChecks) / float64(stats.TotalChecks) * 100
 	}
-
 	if avgResponseTime.Valid {
 		stats.AvgResponseTime = float64(avgResponseTime.Float64) / 1000 // Convert to milliseconds
 	}
 
-	if lastCheck.Valid {
-		stats.LastCheck = lastCheck.Time
+	if lastCheckStr.Valid {
+		// Parse the timestamp string
+		if parsedTime, err := time.Parse("2006-01-02 15:04:05", lastCheckStr.String); err == nil {
+			stats.LastCheck = parsedTime
+		} else if parsedTime, err := time.Parse(time.RFC3339, lastCheckStr.String); err == nil {
+			stats.LastCheck = parsedTime
+		} else {
+			fmt.Printf("DEBUG: Failed to parse timestamp: %s, error: %v\n", lastCheckStr.String, err)
+		}
 
 		// Get last status
 		statusQuery := `SELECT is_up FROM monitor_logs WHERE website_name = ? ORDER BY timestamp DESC LIMIT 1`

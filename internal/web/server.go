@@ -75,10 +75,9 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
             <h1>📊 Ospy Website Monitor</h1>
             <p>Real-time website monitoring dashboard</p>
         </div>
-        
-        {{if .}}
+          {{if .Stats}}
         <div class="stats-grid">
-            {{range .}}
+            {{range .Stats}}
             <div class="stat-card">
                 <h3>{{.WebsiteName}}</h3>
                 <div class="metric">
@@ -116,8 +115,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
             <p>No monitoring data found. Check if monitoring is running.</p>
         </div>
         {{end}}
-        
-        <div class="footer">
+          <div class="footer">
             <p>Last updated: {{.Now.Format "2006-01-02 15:04:05"}} | Auto-refresh: 60s</p>
         </div>
     </div>
@@ -129,7 +127,6 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Template error", http.StatusInternalServerError)
 		return
 	}
-
 	data := struct {
 		Stats []storage.WebsiteStats
 		Now   time.Time
@@ -139,7 +136,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "text/html")
-	t.Execute(w, data.Stats)
+	t.Execute(w, data)
 }
 
 // handleStats serves statistics as JSON

@@ -43,8 +43,7 @@ func (m *Monitor) processResults() {
 		// Log result
 		status := "✅"
 		if !result.IsUp {
-			status = "❌"
-		}
+			status = "❌"		}
 		
 		log.Printf("%s %s (%s) - %s (Time: %v)", 
 			status, result.WebsiteName, result.URL, result.Message, result.ResponseTime)
@@ -65,8 +64,7 @@ func (m *Monitor) processResults() {
 		}
 		
 		if result.Error != nil {
-			logEntry.Error = result.Error.Error()
-		}
+			logEntry.Error = result.Error.Error()		}
 
 		if err := m.storage.SaveLog(logEntry); err != nil {
 			log.Printf("Failed to save log: %v", err)

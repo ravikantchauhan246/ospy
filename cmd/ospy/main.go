@@ -14,6 +14,7 @@ import (
 	"github.com/ravikantchauhan246/ospy/internal/monitor"
 	"github.com/ravikantchauhan246/ospy/internal/notifier"
 	"github.com/ravikantchauhan246/ospy/internal/storage"
+	"github.com/ravikantchauhan246/ospy/internal/web"
 )
 
 // Build-time variables
@@ -45,7 +46,7 @@ func showHelp() {
 	fmt.Println()
 	fmt.Println("ENVIRONMENT VARIABLES:")
 	fmt.Println("  SMTP_USERNAME     - Email username for notifications")
-	fmt.Println("  SMTP_PASSWORD     - Email password for notifications") 
+	fmt.Println("  SMTP_PASSWORD     - Email password for notifications")
 	fmt.Println("  TELEGRAM_BOT_TOKEN - Telegram bot token for notifications")
 }
 
@@ -106,7 +107,7 @@ func main() {
 
 	// Initialize notifiers
 	var notifiers []notifier.Notifier
-	
+
 	// Email notifier
 	if cfg.Notifications.Email.Enabled {
 		emailNotifier := notifier.NewEmailNotifier(
@@ -163,7 +164,7 @@ func main() {
 		for result := range workerPool.Results() {
 			// Send to monitor for logging
 			mon.GetResults() <- result
-			
+
 			// Send to notification manager
 			notifResult := notifier.CheckResult{
 				WebsiteName:  result.WebsiteName,
@@ -178,15 +179,25 @@ func main() {
 			notifManager.HandleResult(notifResult)
 		}
 	}()
-
 	// Start monitoring
 	mon.Start()
+
+	// Start web server if enabled
+	if cfg.Web.Enabled {
+		webServer := web.NewServer(storage, cfg.Web.Port)
+		go func() {
+			log.Printf("Starting web dashboard on http://%s:%d", cfg.Web.Host, cfg.Web.Port)
+			if err := webServer.Start(); err != nil {
+				log.Printf("Web server error: %v", err)
+			}
+		}()
+	}
 
 	// Cleanup routine
 	go func() {
 		ticker := time.NewTicker(24 * time.Hour) // Daily cleanup
 		defer ticker.Stop()
-		
+
 		for range ticker.C {
 			if err := storage.Cleanup(cfg.Storage.RetentionDays); err != nil {
 				log.Printf("Cleanup failed: %v", err)
@@ -199,10 +210,10 @@ func main() {
 		go func() {
 			// Send first report after 1 hour, then weekly
 			time.Sleep(1 * time.Hour)
-			
+
 			ticker := time.NewTicker(7 * 24 * time.Hour) // Weekly
 			defer ticker.Stop()
-			
+
 			for {
 				stats, err := mon.GetAllStats(7 * 24 * time.Hour) // Last 7 days
 				if err != nil {
@@ -210,16 +221,18 @@ func main() {
 				} else if len(stats) > 0 {
 					notifManager.SendSummaryReport(stats)
 				}
-				
+
 				<-ticker.C
 			}
 		}()
 	}
-
-	log.Printf("Ospy started - monitoring %d websites every %v", 
+	log.Printf("Ospy started - monitoring %d websites every %v",
 		len(websites), cfg.Monitoring.Interval)
 	log.Printf("Data stored in: %s", cfg.Storage.Path)
 	log.Printf("Notifications: %d providers enabled", len(notifiers))
+	if cfg.Web.Enabled {
+		log.Printf("Web dashboard: http://%s:%d", cfg.Web.Host, cfg.Web.Port)
+	}
 	log.Printf("Press Ctrl+C to stop")
 
 	// Wait for interrupt signal
