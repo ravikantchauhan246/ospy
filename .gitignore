@@ -76,6 +76,7 @@ temp/
 dist/
 build/
 target/
+releases/
 
 # Coverage reports
 coverage.out

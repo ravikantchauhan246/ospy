@@ -1,0 +1,33 @@
+[Unit]
+Description=Ospy Website Monitor
+Documentation=https://github.com/ravikantchauhan246/ospy
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=ospy
+Group=ospy
+WorkingDirectory=/opt/ospy
+ExecStart=/opt/ospy/ospy -config /opt/ospy/config.yaml
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+RestartSec=5s
+LimitNOFILE=65536
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/ospy/data /opt/ospy/logs
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+
+# Environment variables
+Environment=SMTP_USERNAME=
+Environment=SMTP_PASSWORD=
+Environment=TELEGRAM_BOT_TOKEN=
+
+[Install]
+WantedBy=multi-user.target

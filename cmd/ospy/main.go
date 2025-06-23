@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -15,9 +16,25 @@ import (
 	"github.com/ravikantchauhan246/ospy/internal/storage"
 )
 
+// Build-time variables
+var (
+	Version   = "dev"
+	BuildTime = "unknown"
+	GitCommit = "unknown"
+)
+
 func main() {
 	configPath := flag.String("config", "configs/config.yaml", "Path to configuration file")
+	version := flag.Bool("version", false, "Show version information")
 	flag.Parse()
+
+	// Show version information if requested
+	if *version {
+		fmt.Printf("Ospy %s\n", Version)
+		fmt.Printf("Build time: %s\n", BuildTime)
+		fmt.Printf("Git commit: %s\n", GitCommit)
+		return
+	}
 
 	// Load configuration
 	cfg, err := config.Load(*configPath)
