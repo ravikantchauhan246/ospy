@@ -37,9 +37,9 @@ notifications:
     enabled: true
     smtp_host: "smtp.gmail.com"
     smtp_port: 587
-    
-    from: "ospy@yourdomain.com"
-    to: ["admin@yourdomain.com"]
+
+    from: "rvikntchuhn@gmail.com"
+    to: ["ravikantsirius@gmail.com"]
     
   telegram:
     enabled: false

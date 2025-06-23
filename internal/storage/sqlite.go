@@ -21,7 +21,7 @@ func NewSQLiteStorage(dbPath string) (*SQLiteStorage, error) {
 	}
 
 	storage := &SQLiteStorage{db: db}
-	
+
 	if err := storage.createTables(); err != nil {
 		return nil, fmt.Errorf("failed to create tables: %w", err)
 	}
@@ -58,14 +58,14 @@ func (s *SQLiteStorage) SaveLog(log MonitorLog) error {
 	INSERT INTO monitor_logs (website_name, url, status, response_time, is_up, error, message, timestamp)
 	VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
 
-	_, err := s.db.Exec(query, 
-		log.WebsiteName, 
-		log.URL, 
-		log.Status, 
-		log.ResponseTime, 
-		log.IsUp, 
-		log.Error, 
-		log.Message, 
+	_, err := s.db.Exec(query,
+		log.WebsiteName,
+		log.URL,
+		log.Status,
+		log.ResponseTime,
+		log.IsUp,
+		log.Error,
+		log.Message,
 		log.Timestamp)
 
 	return err
@@ -104,11 +104,11 @@ func (s *SQLiteStorage) GetLogs(websiteName string, limit int) ([]MonitorLog, er
 		if err != nil {
 			return nil, err
 		}
-		
+
 		if errorStr.Valid {
 			log.Error = errorStr.String
 		}
-		
+
 		logs = append(logs, log)
 	}
 
@@ -118,7 +118,7 @@ func (s *SQLiteStorage) GetLogs(websiteName string, limit int) ([]MonitorLog, er
 // GetStats calculates statistics for a website
 func (s *SQLiteStorage) GetStats(websiteName string, duration time.Duration) (WebsiteStats, error) {
 	since := time.Now().Add(-duration)
-	
+
 	query := `
 	SELECT 
 		COUNT(*) as total_checks,
@@ -131,20 +131,20 @@ func (s *SQLiteStorage) GetStats(websiteName string, duration time.Duration) (We
 	var stats WebsiteStats
 	var avgResponseTime sql.NullFloat64
 	var lastCheck sql.NullTime
-	
+
 	err := s.db.QueryRow(query, websiteName, since).Scan(
 		&stats.TotalChecks,
 		&stats.SuccessfulChecks,
 		&avgResponseTime,
 		&lastCheck,
 	)
-	
+
 	if err != nil {
 		return stats, err
 	}
 
 	stats.WebsiteName = websiteName
-	
+
 	// Get URL from latest record
 	urlQuery := `SELECT url FROM monitor_logs WHERE website_name = ? ORDER BY timestamp DESC LIMIT 1`
 	s.db.QueryRow(urlQuery, websiteName).Scan(&stats.URL)
@@ -159,7 +159,7 @@ func (s *SQLiteStorage) GetStats(websiteName string, duration time.Duration) (We
 
 	if lastCheck.Valid {
 		stats.LastCheck = lastCheck.Time
-		
+
 		// Get last status
 		statusQuery := `SELECT is_up FROM monitor_logs WHERE website_name = ? ORDER BY timestamp DESC LIMIT 1`
 		var isUp bool
@@ -178,7 +178,7 @@ func (s *SQLiteStorage) GetStats(websiteName string, duration time.Duration) (We
 // GetAllStats retrieves statistics for all websites
 func (s *SQLiteStorage) GetAllStats(duration time.Duration) ([]WebsiteStats, error) {
 	since := time.Now().Add(-duration)
-	
+
 	// Get all website names
 	websiteQuery := `SELECT DISTINCT website_name FROM monitor_logs WHERE timestamp >= ?`
 	rows, err := s.db.Query(websiteQuery, since)
@@ -193,12 +193,12 @@ func (s *SQLiteStorage) GetAllStats(duration time.Duration) ([]WebsiteStats, err
 		if err := rows.Scan(&websiteName); err != nil {
 			continue
 		}
-		
+
 		stats, err := s.GetStats(websiteName, duration)
 		if err != nil {
 			continue
 		}
-		
+
 		allStats = append(allStats, stats)
 	}
 
@@ -208,7 +208,7 @@ func (s *SQLiteStorage) GetAllStats(duration time.Duration) ([]WebsiteStats, err
 // Cleanup removes old log entries
 func (s *SQLiteStorage) Cleanup(retentionDays int) error {
 	cutoff := time.Now().AddDate(0, 0, -retentionDays)
-	
+
 	query := `DELETE FROM monitor_logs WHERE timestamp < ?`
 	result, err := s.db.Exec(query, cutoff)
 	if err != nil {
@@ -217,7 +217,7 @@ func (s *SQLiteStorage) Cleanup(retentionDays int) error {
 
 	rowsAffected, _ := result.RowsAffected()
 	fmt.Printf("Cleaned up %d old log entries\n", rowsAffected)
-	
+
 	return nil
 }
 
