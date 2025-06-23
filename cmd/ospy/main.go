@@ -23,10 +23,43 @@ var (
 	GitCommit = "unknown"
 )
 
+func showHelp() {
+	fmt.Printf("Ospy - Website Availability Monitor %s\n\n", Version)
+	fmt.Println("USAGE:")
+	fmt.Printf("  %s [OPTIONS]\n\n", os.Args[0])
+	fmt.Println("OPTIONS:")
+	fmt.Println("  -config string")
+	fmt.Println("        Path to configuration file (default \"configs/config.yaml\")")
+	fmt.Println("  -version")
+	fmt.Println("        Show version information")
+	fmt.Println("  -help")
+	fmt.Println("        Show this help information")
+	fmt.Println()
+	fmt.Println("EXAMPLES:")
+	fmt.Printf("  %s -config my-config.yaml    # Run with custom config\n", os.Args[0])
+	fmt.Printf("  %s -version                  # Show version\n", os.Args[0])
+	fmt.Println()
+	fmt.Println("CONFIGURATION:")
+	fmt.Println("  Create a YAML config file with your websites to monitor.")
+	fmt.Println("  See https://github.com/ravikantchauhan246/ospy for examples.")
+	fmt.Println()
+	fmt.Println("ENVIRONMENT VARIABLES:")
+	fmt.Println("  SMTP_USERNAME     - Email username for notifications")
+	fmt.Println("  SMTP_PASSWORD     - Email password for notifications") 
+	fmt.Println("  TELEGRAM_BOT_TOKEN - Telegram bot token for notifications")
+}
+
 func main() {
 	configPath := flag.String("config", "configs/config.yaml", "Path to configuration file")
 	version := flag.Bool("version", false, "Show version information")
+	help := flag.Bool("help", false, "Show help information")
 	flag.Parse()
+
+	// Show help information if requested
+	if *help {
+		showHelp()
+		return
+	}
 
 	// Show version information if requested
 	if *version {
@@ -34,6 +67,19 @@ func main() {
 		fmt.Printf("Build time: %s\n", BuildTime)
 		fmt.Printf("Git commit: %s\n", GitCommit)
 		return
+	}
+
+	// Check if config file exists
+	if _, err := os.Stat(*configPath); os.IsNotExist(err) {
+		fmt.Printf("❌ Configuration file not found: %s\n\n", *configPath)
+		fmt.Println("To get started:")
+		fmt.Println("1. Create a config file:")
+		fmt.Printf("   mkdir -p %s\n", filepath.Dir(*configPath))
+		fmt.Printf("   # Copy example config to %s\n\n", *configPath)
+		fmt.Println("2. Run with config:")
+		fmt.Printf("   %s -config %s\n\n", os.Args[0], *configPath)
+		fmt.Println("3. Or run with -help for more information")
+		os.Exit(1)
 	}
 
 	// Load configuration

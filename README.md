@@ -143,22 +143,34 @@ export TELEGRAM_BOT_TOKEN="123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
 ### Running
 
 ```bash
-# Start monitoring
-./ospy -config configs/config.yaml
+# Start monitoring with example config
+./ospy -config example-config.yaml
+
+# Start monitoring with default config (if configs/config.yaml exists)
+./ospy
 
 # Check version
 ./ospy -version
+
+# Show help
+./ospy -help
 ```
 
 ## 📊 Usage Examples
 
 ### Basic Monitoring
 ```bash
-# Monitor with default config
-./ospy -config configs/config.yaml
+# Monitor with example config
+./ospy -config example-config.yaml
 
-# Monitor with custom settings
+# Monitor with custom config
 ./ospy -config my-custom-config.yaml
+
+# Get help
+./ospy -help
+
+# Check version
+./ospy -version
 ```
 
 ### Docker Deployment
