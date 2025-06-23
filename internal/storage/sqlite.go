@@ -3,6 +3,7 @@ package storage
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -154,15 +155,35 @@ func (s *SQLiteStorage) GetStats(websiteName string, duration time.Duration) (We
 	if avgResponseTime.Valid {
 		stats.AvgResponseTime = float64(avgResponseTime.Float64) / 1000 // Convert to milliseconds
 	}
-
 	if lastCheckStr.Valid {
-		// Parse the timestamp string
-		if parsedTime, err := time.Parse("2006-01-02 15:04:05", lastCheckStr.String); err == nil {
-			stats.LastCheck = parsedTime
-		} else if parsedTime, err := time.Parse(time.RFC3339, lastCheckStr.String); err == nil {
-			stats.LastCheck = parsedTime
-		} else {
-			fmt.Printf("DEBUG: Failed to parse timestamp: %s, error: %v\n", lastCheckStr.String, err)
+		// Parse the timestamp string - handle Go's time.Time.String() format
+		timeStr := lastCheckStr.String
+		
+		// Extract just the date/time part before timezone/monotonic info
+		// Format: "2025-06-23 22:11:53.6464874 +0530 IST m=+25.006109601"
+		// We want: "2025-06-23 22:11:53.6464874"
+		
+		if idx := strings.Index(timeStr, " +"); idx > 0 {
+			timeStr = timeStr[:idx]
+		} else if idx := strings.Index(timeStr, " IST"); idx > 0 {
+			timeStr = timeStr[:idx]
+		} else if idx := strings.Index(timeStr, " UTC"); idx > 0 {
+			timeStr = timeStr[:idx]
+		}
+		
+		// Try parsing with different levels of precision
+		layouts := []string{
+			"2006-01-02 15:04:05.999999999", // nanoseconds
+			"2006-01-02 15:04:05.999999",    // microseconds
+			"2006-01-02 15:04:05.999",       // milliseconds
+			"2006-01-02 15:04:05",           // seconds
+		}
+		
+		for _, layout := range layouts {
+			if parsedTime, err := time.Parse(layout, timeStr); err == nil {
+				stats.LastCheck = parsedTime
+				break
+			}
 		}
 
 		// Get last status
