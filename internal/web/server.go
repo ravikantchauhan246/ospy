@@ -72,18 +72,17 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 <body>
     <div class="container">
         <div class="header">
-            <h1>📊 Ospy Website Monitor</h1>
+            <h1>Ospy Website Monitor</h1>
             <p>Real-time website monitoring dashboard</p>
         </div>
           {{if .Stats}}
         <div class="stats-grid">
             {{range .Stats}}
             <div class="stat-card">
-                <h3>{{.WebsiteName}}</h3>
-                <div class="metric">
+                <h3>{{.WebsiteName}}</h3>                <div class="metric">
                     <span class="metric-label">Status:</span>
                     <span class="metric-value {{if eq .LastStatus "UP"}}status-up{{else}}status-down{{end}}">
-                        {{if eq .LastStatus "UP"}}🟢 UP{{else}}🔴 DOWN{{end}}
+                        {{if eq .LastStatus "UP"}}UP{{else}}DOWN{{end}}
                     </span>
                 </div>
                 <div class="metric">
