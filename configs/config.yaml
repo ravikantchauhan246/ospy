@@ -15,11 +15,6 @@ websites:
     url: "https://github.com"
     method: "GET"
     expected_status: 200
-    
-  - name: "Test Down Site"
-    url: "https://this-site-does-not-exist-12345.com"
-    method: "GET"
-    expected_status: 200
 
 # Notification settings
 notifications:

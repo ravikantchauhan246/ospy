@@ -53,11 +53,8 @@ func (m *Manager) HandleResult(result CheckResult) {
 			LastDown: time.Now(),
 		}
 		m.websiteState[websiteName] = currentState
-		log.Printf("🆕 Initialized state for %s: IsUp=%v", websiteName, result.IsUp)
 		return // Don't send notifications on first check
 	}
-
-	log.Printf("🔄 State check for %s: Current=%v, New=%v", websiteName, currentState.IsUp, result.IsUp)
 
 	// Check for state changes
 	if !currentState.IsUp && result.IsUp {
@@ -68,20 +65,13 @@ func (m *Manager) HandleResult(result CheckResult) {
 		currentState.IsUp = true
 		currentState.LastUp = time.Now()
 		currentState.LastAlert = time.Now()
-		
-	} else if currentState.IsUp && !result.IsUp {
+			} else if currentState.IsUp && !result.IsUp {
 		// Website went down
-		m.sendDownAlert(result.WebsiteName, result.URL, result.Message)		
+		m.sendDownAlert(result.WebsiteName, result.URL, result.Message)
+		
 		currentState.IsUp = false
 		currentState.LastDown = time.Now()
 		currentState.LastAlert = time.Now()
-	} else if !currentState.IsUp && !result.IsUp {
-		// Website is still down - for testing, send alert on second consecutive failure
-		if currentState.LastAlert.IsZero() {
-			log.Printf("🔔 Website still down, sending delayed alert for %s", websiteName)
-			m.sendDownAlert(result.WebsiteName, result.URL, result.Message)
-			currentState.LastAlert = time.Now()
-		}
 	}
 
 	m.websiteState[websiteName] = currentState

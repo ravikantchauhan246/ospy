@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/ravikantchauhan246/ospy/internal/config"
 	"github.com/ravikantchauhan246/ospy/internal/monitor"
 	"github.com/ravikantchauhan246/ospy/internal/notifier"
@@ -55,6 +56,16 @@ func main() {
 	version := flag.Bool("version", false, "Show version information")
 	help := flag.Bool("help", false, "Show help information")
 	flag.Parse()
+
+	// Load .env file if it exists (ignore errors if file doesn't exist)
+	if err := godotenv.Load(); err != nil {
+		// Only log if it's not a "file not found" error
+		if !os.IsNotExist(err) {
+			log.Printf("Warning: Error loading .env file: %v", err)
+		}
+	} else {
+		log.Println("Loaded environment variables from .env file")
+	}
 
 	// Show help information if requested
 	if *help {

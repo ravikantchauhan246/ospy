@@ -39,7 +39,7 @@ Ospy is designed to monitor multiple websites simultaneously using Go's powerful
 - 💻 **CLI Tool** - Command-line interface for easy management
 - 🐳 **Docker Support** - Containerized deployment with Docker Compose
 - 🔧 **System Service** - Linux systemd and Windows service support
-- 🌐 **Web Dashboard** - Real-time status monitoring (coming soon)
+- 🌐 **Web Dashboard** - Real-time status monitoring with visual indicators
 
 ## 🚀 Quick Start
 
@@ -130,7 +130,26 @@ logging:
 
 ### Environment Variables
 
-Set these for sensitive credentials:
+**Option 1: .env File (Recommended)**
+
+Create a `.env` file in the project root (automatically loaded):
+```bash
+# Copy the example file and fill in your credentials
+cp .env.example .env
+
+# Edit the .env file with your actual values
+# Email configuration
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
+
+# Telegram configuration (optional)
+TELEGRAM_BOT_TOKEN=123456789:ABCdefGHIjklMNOpqrsTUVwxyz
+TELEGRAM_CHAT_ID=your-chat-id
+```
+
+**Option 2: System Environment Variables**
+
+Set these manually for sensitive credentials:
 ```bash
 # Email configuration
 export SMTP_USERNAME="your-email@gmail.com"
@@ -138,7 +157,10 @@ export SMTP_PASSWORD="your-app-password"
 
 # Telegram configuration (optional)
 export TELEGRAM_BOT_TOKEN="123456789:ABCdefGHIjklMNOpqrsTUVwxyz"
+export TELEGRAM_CHAT_ID="your-chat-id"
 ```
+
+**Note**: The `.env` file is automatically loaded on startup and takes precedence over system environment variables.
 
 ### Configuration Examples
 
@@ -185,11 +207,39 @@ The health check script will verify:
 # Start monitoring with default config (if configs/config.yaml exists)
 ./ospy
 
+# Access the web dashboard
+# Open your browser to http://localhost:8080
+
 # Check version
 ./ospy -version
 
 # Show help
 ./ospy -help
+```
+
+## 🌐 Web Dashboard
+
+Ospy includes a built-in web dashboard for real-time monitoring:
+
+### Features
+- **Real-time Status** - Visual UP/DOWN indicators with icons
+- **Performance Metrics** - Response times and uptime percentages
+- **Auto-refresh** - Updates every 60 seconds automatically
+- **Responsive Design** - Works on desktop and mobile devices
+- **Historical Data** - Last 24 hours of monitoring data
+
+### Access
+Once Ospy is running, access the dashboard at:
+- **Local**: http://localhost:8080
+- **Network**: http://your-server-ip:8080
+
+### Configuration
+The web dashboard can be configured in `config.yaml`:
+```yaml
+web:
+  enabled: true
+  host: "0.0.0.0"    # Bind to all interfaces
+  port: 8080         # Web server port
 ```
 
 ## 📊 Usage Examples
@@ -262,7 +312,7 @@ ospy/
 │   │   ├── models.go            # Data models
 │   │   └── sqlite.go            # SQLite database operations
 │   └── web/
-│       └── server.go            # Web server (coming soon)
+│       └── server.go            # Web dashboard server
 ├── deploy/
 │   ├── install.sh               # Linux installation script
 │   └── ospy.service             # Systemd service file
@@ -415,6 +465,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🔮 Roadmap
 
+- [x] Web dashboard with visual status indicators
 - [ ] Web dashboard with real-time charts
 - [ ] Prometheus metrics export
 - [ ] Slack and Discord notifications
