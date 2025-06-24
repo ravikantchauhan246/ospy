@@ -192,10 +192,14 @@ func main() {
 	}()
 	// Start monitoring
 	mon.Start()
-
 	// Start web server if enabled
 	if cfg.Web.Enabled {
 		webServer := web.NewServer(storage, cfg.Web.Port)
+		
+		// Setup configuration API
+		configAPI := web.NewConfigAPI(*configPath, cfg)
+		webServer.SetConfigAPI(configAPI)
+		
 		go func() {
 			log.Printf("Starting web dashboard on http://%s:%d", cfg.Web.Host, cfg.Web.Port)
 			if err := webServer.Start(); err != nil {

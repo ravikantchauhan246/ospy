@@ -13,8 +13,9 @@ import (
 
 // Server provides a web interface
 type Server struct {
-	storage storage.Storage
-	port    int
+	storage   storage.Storage
+	port      int
+	configAPI *ConfigAPI
 }
 
 // NewServer creates a new web server
@@ -25,11 +26,21 @@ func NewServer(storage storage.Storage, port int) *Server {
 	}
 }
 
+// SetConfigAPI sets the configuration API handler
+func (s *Server) SetConfigAPI(configAPI *ConfigAPI) {
+	s.configAPI = configAPI
+}
+
 // Start starts the web server
 func (s *Server) Start() error {
 	http.HandleFunc("/", s.handleIndex)
 	http.HandleFunc("/api/stats", s.handleStats)
 	http.HandleFunc("/api/logs", s.handleLogs)
+	
+	// Setup config API routes if available
+	if s.configAPI != nil {
+		s.setupConfigRoutes(s.configAPI)
+	}
 	
 	fmt.Printf("Web dashboard available at: http://localhost:%d\n", s.port)
 	return http.ListenAndServe(fmt.Sprintf(":%d", s.port), nil)
