@@ -15,19 +15,27 @@ websites:
     url: "https://github.com"
     method: "GET"
     expected_status: 200
+    
+  - name: "Test Down Site"
+    url: "https://this-site-does-not-exist-12345.com"
+    method: "GET"
+    expected_status: 200
 
 # Notification settings
 notifications:
   email:
-    enabled: false     # Set to true and configure SMTP to enable email alerts
+    enabled: true
     smtp_host: "smtp.gmail.com"
     smtp_port: 587
-    from: "alerts@yourdomain.com"
-    to: ["admin@yourdomain.com"]
+    username: ""
+    password: ""
+    from: "ospy-alerts@gmail.com"
+    to: ["rvikntchuhn@gmail.com"]
     
   telegram:
-    enabled: false     # Set to true and configure bot token to enable Telegram alerts
-    chat_id: "your-chat-id"
+    enabled: true
+    bot_token: ""
+    chat_id: ""
 
 # Storage configuration
 storage:
